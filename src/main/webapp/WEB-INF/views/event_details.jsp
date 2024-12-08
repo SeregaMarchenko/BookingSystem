@@ -13,9 +13,12 @@
   User user = (User) session.getAttribute("user");  // Получаем пользователя из сессии
   if (event != null) {
 %>
-<h1>Event: <%= event.getName() %></h1>
-<h2>Date: <%= event.getDate() %></h2>
-<h2>Location: <%= event.getLocation() %></h2>
+<h1>Event: <%= event.getName() %>
+</h1>
+<h2>Date: <%= event.getDate() %>
+</h2>
+<h2>Location: <%= event.getLocation() %>
+</h2>
 <h2>Available Tickets:</h2>
 <ul>
   <%
@@ -25,8 +28,8 @@
   <li>Seat Number: <%= ticket.getSeatNumber() %>
     <form action="book_ticket" method="post" style="display:inline;">
       <input type="hidden" name="ticketId" value="<%= ticket.getId() %>">
-      <input type="hidden" name="eventId" value="<%= event.getId() %>">  <!-- Передаем eventId для возврата -->
-      <input type="hidden" name="userId" value="<%= user != null ? user.getId() : "" %>">  <!-- Передаем userId -->
+      <input type="hidden" name="eventId" value="<%= event.getId() %>">
+      <input type="hidden" name="userId" value="<%= user != null ? user.getId() : "" %>">
       <input type="submit" value="Book">
     </form>
   </li>
@@ -41,5 +44,8 @@
 <%
   }
 %>
+<form action="event_list" method="get">
+  <button type="submit">Go Back</button>
+</form>
 </body>
 </html>

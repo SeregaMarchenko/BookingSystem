@@ -26,24 +26,27 @@ public class RegistrationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
         String email = req.getParameter("email");
-        String role = req.getParameter("role");
 
         try {
+            if (userService.isUsernameTaken(username)) {
+                req.setAttribute("errorMessage", "Username already taken. Please choose another one.");
+                req.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(req, resp);
+            } else {
+                User user = new User();
+                user.setUsername(username);
+                user.setPassword(password);
+                user.setEmail(email);
+                user.setRole("user");
 
-            User user = new User();
-            user.setUsername(username);
-            user.setPassword(password);
-            user.setEmail(email);
-            user.setRole(role);
-
-            userService.save(user);
-            resp.sendRedirect("login");
+                userService.save(user);
+                resp.sendRedirect("login");
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error registering user: " + e.getMessage(), e);
         }
     }
 }

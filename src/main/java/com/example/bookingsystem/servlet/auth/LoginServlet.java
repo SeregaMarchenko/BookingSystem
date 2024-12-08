@@ -7,7 +7,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -34,20 +33,24 @@ public class LoginServlet extends HttpServlet {
         User user = null;
         try {
             user = userService.validateUser(username, password);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        if (user != null) {
-            req.getSession().setAttribute("user", user);
-            if ("admin".equals(user.getRole())) {
-                resp.sendRedirect("admin");  // Перенаправление на страницу админа
+            if (user != null) {
+                if (user.isBlocked()) {
+                    req.setAttribute("errorMessage", "Your account is blocked. Please contact support.");
+                    req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
+                } else {
+                    req.getSession().setAttribute("user", user);
+                    if ("admin".equals(user.getRole())) {
+                        resp.sendRedirect("admin");
+                    } else {
+                        resp.sendRedirect("user_home");
+                    }
+                }
             } else {
-                resp.sendRedirect("user_home");  // Перенаправление на страницу профиля пользователя
+                req.setAttribute("errorMessage", "Invalid username or password.");
+                req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
             }
-        } else {
-            req.setAttribute("errorMessage", "Invalid username or password");
+        } catch (SQLException | NoSuchAlgorithmException e) {
+            req.setAttribute("errorMessage", "Error logging in: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
         }
     }

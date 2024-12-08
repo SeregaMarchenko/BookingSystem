@@ -41,6 +41,12 @@
   %>
   <li>
     Event: <%= event != null ? event.getName() : "Unknown Event" %> - Seat: <%= ticket.getSeatNumber() %> - Booked: <%= ticket.isBooked() %>
+    <form action="unbook_ticket" method="post" style="display:inline;">
+      <input type="hidden" name="ticketId" value="<%= ticket.getId() %>">
+      <input type="hidden" name="eventId" value="<%= event != null ? event.getId() : "" %>">
+      <input type="hidden" name="userId" value="<%= ((User)request.getAttribute("user")).getId() %>">
+      <button type="submit">Unbook</button>
+    </form>
   </li>
   <%
     }

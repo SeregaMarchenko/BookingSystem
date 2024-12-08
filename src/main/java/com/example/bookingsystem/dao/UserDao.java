@@ -1,28 +1,24 @@
 package com.example.bookingsystem.dao;
 
-
 import com.example.bookingsystem.model.User;
 import com.example.bookingsystem.util.DatabaseUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDao {
     public void save(User user) throws SQLException {
-        String query = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO users (username, password, email, role, is_blocked) VALUES (?, ?, ?, ?, ?)";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, hashPassword(user.getPassword()));
             statement.setString(3, user.getEmail());
             statement.setString(4, user.getRole());
+            statement.setBoolean(5, user.isBlocked());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -48,6 +44,7 @@ public class UserDao {
                     user.setPassword(resultSet.getString("password"));
                     user.setEmail(resultSet.getString("email"));
                     user.setRole(resultSet.getString("role"));
+                    user.setBlocked(resultSet.getBoolean("is_blocked"));
                     return user;
                 }
             }
@@ -68,6 +65,7 @@ public class UserDao {
                     user.setPassword(resultSet.getString("password"));
                     user.setEmail(resultSet.getString("email"));
                     user.setRole(resultSet.getString("role"));
+                    user.setBlocked(resultSet.getBoolean("is_blocked"));
                     return user;
                 }
             }
@@ -88,6 +86,7 @@ public class UserDao {
                 user.setPassword(resultSet.getString("password"));
                 user.setEmail(resultSet.getString("email"));
                 user.setRole(resultSet.getString("role"));
+                user.setBlocked(resultSet.getBoolean("is_blocked"));
                 users.add(user);
             }
         }
@@ -95,28 +94,48 @@ public class UserDao {
     }
 
     public void update(User user) throws SQLException {
-        String query = "UPDATE users SET username = ?, password = ?, email = ?, role = ? WHERE id = ?";
+        String query = "UPDATE users SET username = ?, password = ?, email = ?, role = ?, is_blocked = ? WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, user.getUsername());
             statement.setString(2, hashPassword(user.getPassword()));
             statement.setString(3, user.getEmail());
             statement.setString(4, user.getRole());
-            statement.setLong(5, user.getId());
+            statement.setBoolean(5, user.isBlocked());
+            statement.setLong(6, user.getId());
             statement.executeUpdate();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void delete(User user) throws SQLException {
-        String query = "DELETE FROM users WHERE id = ?";
+    public void deleteById(Long userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setLong(1, user.getId());
-            statement.executeUpdate();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, userId);
+            stmt.executeUpdate();
         }
     }
+
+    public void blockById(Long userId) throws SQLException {
+        String sql = "UPDATE users SET is_blocked = TRUE WHERE id = ?";
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void unblockById(Long userId) throws SQLException {
+        String sql = "UPDATE users SET is_blocked = FALSE WHERE id = ?";
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
     public String hashPassword(String password) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] hash = md.digest(password.getBytes());

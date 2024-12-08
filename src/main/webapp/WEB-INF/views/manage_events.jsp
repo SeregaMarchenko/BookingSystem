@@ -25,16 +25,26 @@
 <form action="admin" method="get">
     <button type="submit">Go Back</button>
 </form>
+
 <%
     String errorMessage = (String) request.getAttribute("errorMessage");
+    String message = (String) session.getAttribute("message");
     if (errorMessage != null) {
 %>
 <div style="color: red;">
     <%= errorMessage %>
 </div>
 <%
+} else if (message != null) {
+%>
+<div style="color: green;">
+    <%= message %>
+</div>
+<%
+        session.removeAttribute("message");
     }
 %>
+
 <h2>Event List</h2>
 <ul>
     <%
@@ -47,7 +57,8 @@
         tickets available
         <form action="delete_event" method="post" style="display:inline;">
             <input type="hidden" name="id" value="<%= event.getId() %>">
-            <input type="submit" value="Delete"></form>
+            <input type="submit" value="Delete">
+        </form>
     </li>
     <%
         }

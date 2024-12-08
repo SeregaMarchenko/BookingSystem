@@ -34,8 +34,16 @@ public class UserService {
         userDao.update(user);
     }
 
-    public void delete(User user) throws SQLException {
-        userDao.delete(user);
+    public void deleteById(Long userId) throws SQLException {
+        userDao.deleteById(userId);
+    }
+
+    public void blockUserById(Long userId) throws SQLException {
+        userDao.blockById(userId);
+    }
+
+    public void unblockUserById(Long userId) throws SQLException {
+        userDao.unblockById(userId);
     }
 
     public User validateUser(String username, String password) throws SQLException, NoSuchAlgorithmException {
@@ -44,6 +52,10 @@ public class UserService {
             return user;
         }
         return null;
+    }
+
+    public boolean isUsernameTaken(String username) throws SQLException {
+        return userDao.findByUsername(username) != null;
     }
 
 }

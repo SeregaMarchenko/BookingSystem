@@ -4,11 +4,7 @@ import com.example.bookingsystem.model.Event;
 import com.example.bookingsystem.model.Ticket;
 import com.example.bookingsystem.util.DatabaseUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,17 +67,21 @@ public class TicketDao {
     }
 
     public void update(Ticket ticket) throws SQLException {
-        String query = "UPDATE tickets SET event_id = ?, user_id = ?, seat_number = ?, is_booked = ? WHERE id = ?";
+        String sql = "UPDATE tickets SET user_id = ?, is_booked = ? WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setLong(1, ticket.getEventId());
-            statement.setLong(2, ticket.getUserId());
-            statement.setInt(3, ticket.getSeatNumber());
-            statement.setBoolean(4, ticket.isBooked());
-            statement.setLong(5, ticket.getId());
-            statement.executeUpdate();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            if (ticket.getUserId() != null) {
+                stmt.setLong(1, ticket.getUserId());
+            } else {
+                stmt.setNull(1, java.sql.Types.BIGINT);
+            }
+            stmt.setBoolean(2, ticket.isBooked());
+            stmt.setLong(3, ticket.getId());
+            System.out.println(stmt);
+            stmt.executeUpdate();
         }
     }
+
 
     public void delete(Ticket ticket) throws SQLException {
         String query = "DELETE FROM tickets WHERE id = ?";

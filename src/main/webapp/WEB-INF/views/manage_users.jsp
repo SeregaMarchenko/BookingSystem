@@ -30,12 +30,20 @@
 </form>
 <%
     String errorMessage = (String) request.getAttribute("errorMessage");
+    String message = (String) session.getAttribute("message");
     if (errorMessage != null) {
 %>
 <div style="color: red;">
     <%= errorMessage %>
 </div>
 <%
+} else if (message != null) {
+%>
+<div style="color: green;">
+    <%= message %>
+</div>
+<%
+        session.removeAttribute("message");
     }
 %>
 <h2>User List</h2>
@@ -48,20 +56,13 @@
     <li>
         <%= user.getUsername() %> - <%= user.getEmail() %>
         <form action="delete_user" method="post" style="display:inline;">
-            <input type="hidden" name="userId" value="<%= user.getId() %>">
+            <input type="hidden" name="id" value="<%= user.getId() %>">
             <button type="submit">Delete</button>
         </form>
-        <% if (user.isBlocked()) { %>
-        <form action="unblock_user" method="post" style="display:inline;">
-            <input type="hidden" name="userId" value="<%= user.getId() %>">
-            <button type="submit">Unblock</button>
+        <form action="<%= user.isBlocked() ? "unblock_user" : "block_user" %>" method="post" style="display:inline;">
+            <input type="hidden" name="id" value="<%= user.getId() %>">
+            <button type="submit"><%= user.isBlocked() ? "Unblock" : "Block" %></button>
         </form>
-        <% } else { %>
-        <form action="block_user" method="post" style="display:inline;">
-            <input type="hidden" name="userId" value="<%= user.getId() %>">
-            <button type="submit">Block</button>
-        </form>
-        <% } %>
     </li>
     <%
         }
